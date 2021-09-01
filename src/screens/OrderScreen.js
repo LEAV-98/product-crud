@@ -1,10 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { Header } from "./Header";
 import { firebase } from "../firebase/firebase-config";
 import moment from "moment";
 import emailjs from "emailjs-com";
 import Swal from "sweetalert2";
+import { CssBaseline, makeStyles } from "@material-ui/core";
+import { SideBar } from "./SideBar";
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    display: "flex",
+  },
+  content: {
+    paddingTop: "5rem",
+    flexGrow: 1,
+    height: "100vh",
+    overflow: "auto",
+  },
+}));
 export const OrderScreen = () => {
   let { id } = useParams();
   const [order, setOrder] = useState({});
@@ -45,7 +58,7 @@ export const OrderScreen = () => {
           console.log("SUCCESS!", response.status, response.text);
           Swal.fire({
             title: "Pedido Enviado",
-            text: "Enviand correo a" + email,
+            text: "Enviand correo a " + email,
             icon: "success",
             showConfirmButton: false,
             timer: 4000,
@@ -89,80 +102,97 @@ export const OrderScreen = () => {
   //     console.log("ha sido recibido");
   //   }
   // }, [order.estado]);
+  const classes = useStyles();
+
   return (
     <>
-      <Header />
-      <div className="container">
-        <div className="row">
-          <div className="col-md-8">
-            <Link to="/orders" className="btn btn-success">
+      <div className={classes.root}>
+        <CssBaseline />
+        <SideBar />
+        <main className={classes.content}>
+          <div className="container">
+            <Link to="/orders" className="btn btn-success my-2">
               Volver
             </Link>
-
-            <h2>Pedido N° {order.id}</h2>
-            <p>
-              Pedido realizado el{" "}
-              {moment(order.tiempo).format("Do MMMM YYYY, h:mm:ss a")}
-            </p>
-            <p className="d-inline mr-2">Estado del pedido</p>
-            <button
-              className={
-                order.estado === "Por Confirmar"
-                  ? "btn btn-danger "
-                  : order.estado === "Enviado"
-                  ? "btn btn-warning"
-                  : "btn btn-primary"
-              }
-            >
-              {order.estado}
-            </button>
-            <p>Tu pedido fue</p>
             <div className="row">
-              {order.shoppingCart?.map((product, i) => (
-                <div className="card col-md-6 col-sm-12" key={i}>
-                  <img
-                    className="card-img-top"
-                    alt="img"
-                    src={product.imagenUrl}
-                  />
-                  <div className="card-body">
-                    <p className="card-text">Cantidad: {product.cantidad}</p>
-                  </div>
+              <div className="col-md-8">
+                <h2>Pedido N° {order.id}</h2>
+                <p>
+                  Pedido realizado el{" "}
+                  {moment(order.tiempo).format("Do MMMM YYYY, h:mm:ss a")}
+                </p>{" "}
+                <p>Nombre del cliente: {order.nombre}</p>
+                <p>Precio total: S./{order.precioTotal}</p>
+                <p>Dirección: {order.direccion}</p>
+                <p>Referencia: {order.referencia}</p>
+                <p>Telefono de Contacto: {order.telefono}</p>
+                <p className="d-inline mr-2">Estado del pedido</p>
+                <button
+                  className={
+                    order.estado === "Por Confirmar"
+                      ? "btn btn-danger "
+                      : order.estado === "Enviado"
+                      ? "btn btn-warning"
+                      : "btn btn-primary"
+                  }
+                >
+                  {order.estado}
+                </button>
+                <h3>El pedido fue</h3>
+                <div className="row">
+                  {order.shoppingCart?.map((product, i) => (
+                    <div className="card col-md-6 col-sm-12" key={i}>
+                      <img
+                        className="card-img-top"
+                        alt="img"
+                        src={product.imagenUrl}
+                      />
+                      <div className="card-body">
+                        <p className="card-text">Nombre: {product.title}</p>
+                        <p className="card-text">
+                          Cantidad: {product.cantidad}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+              {order.estado === "Recibido" ? (
+                <h4 className="text-center">Pedido ya culminado</h4>
+              ) : (
+                <form className="col-md-4" onSubmit={handleSubmit}>
+                  <h4>Cambiar el estado del pedido</h4>
+                  <div className="form-group">
+                    <select
+                      className="form-control"
+                      id="exampleFormControlSelect1"
+                    >
+                      {order.estado === "Por Confirmar" ? (
+                        <>
+                          <option>Enviado</option>
+                          <option>Recibido</option>
+                        </>
+                      ) : order.estado === "Enviado" ? (
+                        <>
+                          <option>Recibido</option>
+                        </>
+                      ) : (
+                        <></>
+                      )}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <input
+                      type="submit"
+                      value="Guardar"
+                      className="btn btn-primary"
+                    />
+                  </div>
+                </form>
+              )}
             </div>
           </div>
-          {order.estado === "Recibido" ? (
-            <h4>Pedido ya culminado</h4>
-          ) : (
-            <form className="col-md-4" onSubmit={handleSubmit}>
-              <h4>Cambiar el estado del pedido</h4>
-              <div className="form-group">
-                <select className="form-control" id="exampleFormControlSelect1">
-                  {order.estado === "Por Confirmar" ? (
-                    <>
-                      <option>Enviado</option>
-                      <option>Recibido</option>
-                    </>
-                  ) : order.estado === "Enviado" ? (
-                    <>
-                      <option>Recibido</option>
-                    </>
-                  ) : (
-                    <></>
-                  )}
-                </select>
-              </div>
-              <div className="form-group">
-                <input
-                  type="submit"
-                  value="Guardar"
-                  className="btn btn-primary"
-                />
-              </div>
-            </form>
-          )}
-        </div>
+        </main>
       </div>
     </>
   );

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { firebase } from "../firebase/firebase-config";
 import { SideBar } from "./SideBar";
+import Swal from "sweetalert2";
 const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
@@ -35,15 +36,31 @@ export const ProductsScreen = () => {
     };
   }, []);
   const handleDelete = (id) => {
-    firebase
-      .firestore()
-      .collection("products")
-      .doc(id)
-      .delete()
-      .then(() => {
-        console.log("Eliminado con exito");
-      })
-      .catch((e) => console.log(e));
+    Swal.fire({
+      title: "¿Estas seguro que quieres eliminar?",
+      showDenyButton: false,
+      showCancelButton: true,
+      confirmButtonText: `Si`,
+      denyButtonText: `Don't save`,
+      cancelButtonText: "No",
+    }).then((result) => {
+      /* Read more about isConfirmed, isDenied below */
+      if (result.isConfirmed) {
+        firebase
+          .firestore()
+          .collection("products")
+          .doc(id)
+          .delete()
+          .then(() => {
+            console.log("Eliminado con exito");
+          })
+          .catch((e) => console.log(e));
+        Swal.fire("Eliminado", "", "success");
+      } else if (result.isDenied) {
+        Swal.fire("Changes are not saved", "", "info");
+      }
+    });
+
     cargarProductos();
   };
 
@@ -70,6 +87,7 @@ export const ProductsScreen = () => {
                 <div className="card-body">
                   <h3 className="card-title">Nombre: {product.title}</h3>
                   <p className="card-text">Precio: ${product.precio}</p>
+                  <p className="card-text">Tipo: {product.tipo}</p>
                   <p>Descripción: {product.description}</p>
                   <div className="btn-group " role="group">
                     <Link

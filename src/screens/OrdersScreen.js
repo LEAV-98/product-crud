@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { firebase } from "../firebase/firebase-config";
 import moment from "moment";
-import { Link } from "react-router-dom";
 import { CssBaseline, makeStyles } from "@material-ui/core";
 import { SideBar } from "./SideBar";
+import { OrderList } from "./OrderList";
+import { LoadingScreen } from "./LoadingScreen";
+import { TableOrders } from "./TableOrders";
 const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
@@ -17,67 +19,105 @@ const useStyles = makeStyles((theme) => ({
 }));
 export const OrdersScreen = () => {
   const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [buttonToogle, setButtonToogle] = useState(0);
   useEffect(() => {
     firebase
       .firestore()
       .collection("orders")
-      .orderBy("tiempo")
+      .orderBy("tiempo", "desc")
       .onSnapshot((snapshot) => {
         const newOrders = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
         setOrders(newOrders);
+        setLoading(true);
       });
     return () => {
       setOrders([]);
     };
   }, []);
+
   const classes = useStyles();
 
   return (
     <>
-      <div className={classes.root}>
-        <CssBaseline />
-        <SideBar />
-        <main className={classes.content}>
-          <div className="container">
-            <h1>Ordenes</h1>
-
-            <div className="row">
-              {orders.map((order) => (
-                <div className="card col-md-4 col-sm-12" key={order.id}>
-                  <div className="card-body">
-                    <p className="card-title">N° de pedido: {order.id}</p>
-                    <p>
-                      Fecha y Hora:{" "}
-                      {moment(order.tiempo).format("MMMM Do YYYY, h:mm:ss a")}
-                    </p>
-                    <p className="card-text d-inline">Estado de pedido </p>
-                    <button
-                      className={
-                        order.estado === "Por Confirmar"
-                          ? "btn btn-danger "
-                          : order.estado === "Enviado"
-                          ? "btn btn-warning"
-                          : "btn btn-primary"
-                      }
-                    >
-                      {order.estado}
-                    </button>
-                    <Link
-                      className="btn btn-success d-block mt-2"
-                      to={`/orders/${order.id}`}
-                    >
-                      Ver Más
-                    </Link>
-                  </div>
+      {loading ? (
+        <div className={classes.root}>
+          <CssBaseline />
+          <SideBar />
+          <main className={classes.content}>
+            <div className="container">
+              <h1>Ordenes</h1>
+              <div className="btn-group my-2">
+                <button
+                  className="btn btn-primary"
+                  onClick={() => setButtonToogle(0)}
+                >
+                  Tabla
+                </button>
+                <button
+                  className="btn btn-primary"
+                  onClick={() => setButtonToogle(1)}
+                >
+                  Cards
+                </button>
+              </div>
+              <div
+                className={
+                  buttonToogle === 0 ? "view-container" : "hide-container"
+                }
+              >
+                <h2>Ordenes del {moment(Date()).format("LL")}</h2>
+                <TableOrders
+                  orders={orders.filter(
+                    (order) =>
+                      moment(order.tiempo).format("LL") ===
+                      moment(Date()).format("LL")
+                  )}
+                />
+                <h2>Ordenes de otros dias</h2>
+                <TableOrders
+                  orders={orders.filter(
+                    (order) =>
+                      moment(order.tiempo).format("LL") !==
+                      moment(Date()).format("LL")
+                  )}
+                />
+              </div>
+              <div
+                className={
+                  buttonToogle === 1 ? "view-container" : "hide-container"
+                }
+              >
+                <h2>Ordenes del {moment(Date()).format("LL")}</h2>
+                <div className="row">
+                  <OrderList
+                    orders={orders.filter(
+                      (order) =>
+                        moment(order.tiempo).format("LL") ===
+                        moment(Date()).format("LL")
+                    )}
+                  />
                 </div>
-              ))}
+                <h2>Ordenes de otros dias</h2>
+                <div className="row">
+                  <OrderList
+                    orders={orders.filter(
+                      (order) =>
+                        moment(order.tiempo).format("LL") !==
+                        moment(Date()).format("LL")
+                    )}
+                  />
+                </div>
+              </div>
             </div>
-          </div>
-        </main>
-      </div>
+          </main>
+        </div>
+      ) : (
+        <LoadingScreen />
+      )}
     </>
   );
 };

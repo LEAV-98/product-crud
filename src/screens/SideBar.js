@@ -10,7 +10,7 @@ import Divider from "@material-ui/core/Divider";
 import IconButton from "@material-ui/core/IconButton";
 import MenuIcon from "@material-ui/icons/Menu";
 import ArrowBackIosIcon from "@material-ui/icons/ArrowBackIos";
-import { mainListItems, secondaryListItems } from "./ListItems";
+import { MainListItems } from "./ListItems";
 const drawerWidth = 240;
 
 const useStyles = makeStyles((theme) => ({
@@ -131,9 +131,9 @@ export const SideBar = () => {
           </IconButton>
         </div>
         <Divider />
-        <List>{mainListItems}</List>
-        <Divider />
-        <List>{secondaryListItems}</List>
+        <List>
+          <MainListItems />
+        </List>
       </Drawer>
     </>
   );

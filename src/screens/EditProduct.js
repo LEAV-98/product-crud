@@ -66,6 +66,7 @@ export const EditProduct = () => {
     console.log(fileUrl);
     await db.doc(`products/${editProduct[0].id}`).update({
       ...formValues,
+      tipo: document.querySelector("#exampleFormControlSelect2").value,
       imagenUrl: fileUrl,
     });
     Swal.fire("Saved", "Pizza editada con exito", "success");
@@ -111,7 +112,8 @@ export const EditProduct = () => {
                       </div>
                       <div className="form-group">
                         <label>
-                          Descripción Anterior: {editProduct[0].description}
+                          Descripción Anterior: <br />{" "}
+                          {editProduct[0].description}
                         </label>
                         <input
                           className="form-control"
@@ -120,6 +122,20 @@ export const EditProduct = () => {
                           name="description"
                           onChange={handleInputChange}
                         />
+                      </div>
+
+                      <div className="form-group">
+                        <label htmlFor="exampleFormControlSelect2">
+                          Tipo de producto
+                        </label>
+                        <select
+                          className="form-control"
+                          id="exampleFormControlSelect2"
+                        >
+                          <option>Pizzas</option>
+                          <option>Pastas</option>
+                          <option>Combos</option>
+                        </select>
                       </div>
                       <div className="form-group">
                         <p>Imagen Anterior</p>

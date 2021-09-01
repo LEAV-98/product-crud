@@ -35,6 +35,7 @@ export const AddProduct = () => {
       .collection("products")
       .add({
         ...formValues,
+        tipo: document.querySelector("#exampleFormControlSelect2").value,
         imagenUrl: fileUrl,
       });
     Swal.fire("Saved", "Pizza añadida con exito", "success");
@@ -77,6 +78,7 @@ export const AddProduct = () => {
                         onChange={handleInputChange}
                       />
                     </div>
+
                     <div className="form-group">
                       <label>Descripción</label>
                       <input
@@ -86,6 +88,20 @@ export const AddProduct = () => {
                         name="description"
                         onChange={handleInputChange}
                       />
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="exampleFormControlSelect2">
+                        Tipo de producto
+                      </label>
+                      <select
+                        className="form-control"
+                        id="exampleFormControlSelect2"
+                      >
+                        <option>Pizzas</option>
+                        <option>Pastas</option>
+                        <option>Combos</option>
+                      </select>
                     </div>
                     <div className="form-group">
                       <p>Imagen </p>
